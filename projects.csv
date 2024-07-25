@@ -1,0 +1,31 @@
+project;title;experiments;platform;library_prep;range;library_layout;type;DONE
+OUR;Zebrafish snoRNome;12;Illumina HiSeq 2000;TruSeq Total RNA Sample Prep Kit;mid;paired;tissue or sex;y
+PRJNA347637M;Expression of distinct maternal and somatic 5.8S, 18S, and 28S rRNA types during zebrafish development;19;Ion PI Chips v4;Ion Total RNA-Seq Kit v2 and the Ion Xpress RNA-Seq Barcoding Kit;mid;single;time;y
+SRP055573;RNA-seq of zebrafish brain, liver and skin during perturbation with rotenone at young and old age;36;Illumina HiSeq 2000;TruSeq RNA Sample Prep Kit;polyA;single;tissue;
+SRP022612;RNA-seq of Danio rerio and Mus musculus skin for three different age groups;20;Illumina HiSeq 2000;TruSeq RNA Sample Prep Kit;polyA;single;time;
+SRP044781;Gene evolution and gene expression after whole genome duplication in fish: the PhyloFish database.;12;Illumina HiSeq 2000;TruSeq stranded total RNA;polyA;paired;tissue;
+PRJNA338400;Systematic identification and characterization of long non-coding RNAs in zebrafish through RNA-Seq;9;Illumina HiSeq 2000;TruSeq RNA Sample Prep Kit;polyA;paired;tissue;y
+PRJNA154389;Comprehensive identification of long non-coding RNAs expressed during zebrafish embryogenesis;17;Illumina HiSeq 2000;modified UTP method;polyA-depleted;paired;time;
+PRJNA245824;Deep sequencing of small RNA facilitates tissue and sex associated microRNA discovery in zebrafish;33;Illumina HiSeq 2000;TruSeq Small RNA library kit;small;single;tissue or sex;y
+PRJNA347637S;Expression of distinct maternal and somatic 5.8S, 18S, and 28S rRNA types during zebrafish development;15;Ion PI Chips v3;Ion Total RNA-Seq Kit v2 and the Ion Xpress RNA-Seq Barcoding Kit;small;single;time;y
+PRJNA714931;Phenotypically anchored mRNA and miRNA expression profiling in zebrafish reveals flame retardant chemical toxicity networks;44;Illumina HiSeq 2000;TruSeq Small RNA library kit;small;single;treatment;y
+PRJNA360585;Developmental Exposure To PCB153 Alters Genes Related To Circadian Rhythm And Metabolism In Zebrafish (Danio rerio);16;Illumina HiSeq 2500;Truseq Stranded total RNA library prep kit ;total;single;treatment;y
+PRJNA330616;RNA-seq analysis comparing WT, Rad21 MO and CTCF MO zebrafish embryos at stages;15;Illumina HiSeq 2000;TruSeq stranded total RNA-ribozero kit;total;paired;time;y
+PRJNA575566;Spontaneous induction of interferon signaling in zebrafish larvae;8;Illumina HiSeq 2500;TruSeq stranded total RNA-ribozero kit;total;paired;treatment;y
+PRJNA407368;RNA-seq timecourse analysis during zebrafish heart looping morphogenesis ;24;Illumina HiSeq 2000;NuGEN Ovation RNA-Seq Library System;total;single;time;y
+PRJNA743561;Single cell imaging of T cell immunotherapy responses in vivo;33;Illumina NextSeq 500;TruSeq stranded total RNA-ribozero kit;total;single;treatment;y
+PRJNA695140;Zebrafish caloric restriction;12;Illumina NextSeq 500;TruSeq Total RNA Sample Prep Kit;total;single;treatment;y
+PRJNA692493;Localized EMT reprograms glial progenitors to promote spinal cord repair [bulk RNA-seq] ;11;Illumina HiSeq 3000;TruSeq Total RNA Sample Prep Kit;total;single;treatment;y
+PRJNA600413;Withdrawal from chronic alcohol exposure leads to tissue-specific recovery of the zebrafish transcriptome;26;Illumina HiSeq 2000;TruSeq Total RNA Sample Prep Kit;total;paired;treatment;y
+PRJNA640350;Embryonic origins of endothelial heterogeneity (Random promed bulk RNA-seq data to assess an improved zebrafish transcriptome annotation);6;Illumina HiSeq 2000;TruSeq Total RNA Sample Prep Kit;total;paired;treatment;y
+PRJNA543225;GAS7 Deficiency Promotes Metastasis of MYCN-driven Neuroblastoma;6;Illumina HiSeq 2000;TruSeq Total RNA Sample Prep Kit;total;paired;treatment;y
+PRJNA278935;Transcriptome profiling from the brain of male and female zebrafish;2;Illumina HiSeq 2500;TruSeq Total RNA Sample Prep Kit;total;single;sex;
+PRJNA640808;Optimized design of antisense oligomers for targeted rRNA depletion;13;Illumina NextSeq 500;NEB Ultra II RNA-seq library kit;total or polyA;paired;treatment;
+;TGIRT-SS3;3;;;;;;y
+PRJNA548449;Dyskerin impairment in zebrafish ;6;Illumina HiSeq 2000;TruSeq RNA Sample Prep Kit;polyA;single;treatment;y
+PRJNA386102;Early life exposure to low levels of AHR agonist 3,3’,4,4’,5-pentachlorobiphenyl;24;Illumina HiSeq 2500;TruSeq Total RNA Sample Prep Kit;total;single;treatment;
+PRJNA193544;;;;;;;;
+;;;;;;;;
+;;;;;;;;
+;;;;;;;;
+;;335;;;;;;
