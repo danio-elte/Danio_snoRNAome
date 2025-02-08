@@ -1,0 +1,44 @@
+<h2><strong>User Journey: How to Use the snoDanio Database</strong></h2>
+
+<p>The <strong>snoDanio: the zebrafish snoRNAome database</strong> is a comprehensive resource for exploring zebrafish snoRNAs and their functional annotations. Here's how you can navigate and make the most of the database:</p>
+
+<hr>
+
+<h3>1. <strong>Explore the "About" Section</strong> 🛈</h3>
+<ul>
+  <li>Begin by visiting the <strong>About</strong> tab, where you’ll find an overview of snoRNAs and their significance.</li>
+  <li>Visuals and textual descriptions provide insights into their roles, classifications, and biological relevance.</li>
+</ul>
+
+<hr>
+
+<h3>2. <strong>Discover snoRNAs in the "Description of snoRNAs" Section</strong> 🔍</h3>
+<ul>
+  <li>Use the interactive table to browse and explore zebrafish snoRNA entries.</li>
+  <li>Select any gene from the table to view additional details in the sidebar, including its gene ID, parent information, and family classification.</li>
+  <li>If you need the sequence of a specific snoRNA, simply select the row and use the <strong>Download FASTA</strong> button to save the sequence for further analysis.</li>
+</ul>
+
+<hr>
+
+<h3>3. <strong>Dive Deeper with the "Explorer" Tab</strong> 📊</h3>
+<ul>
+  <li>Choose a <strong>size range</strong> and <strong>experiment type</strong> using the dropdowns to filter datasets.</li>
+  <li>Select a specific project and provide a gene ID of interest to explore its normalized expression values across experimental conditions.</li>
+  <li>Visualize the gene's expression through interactive boxplots generated on demand.</li>
+  <li>Parent gene information and expression data are also accessible for comprehensive analysis.</li>
+</ul>
+
+<hr>
+
+<h3>4. <strong>Reference and Citation</strong> 📖</h3>
+<ul>
+  <li>Visit the <strong>References</strong> tab to explore the data sources and projects used to build snoDanio.</li>
+  <li>This section includes bioproject IDs details for further reading.</li>
+</ul>
+
+<hr>
+
+<p>With features like downloadable sequences, detailed annotations, and interactive visualizations, <strong>snoDanio</strong> empowers researchers to explore the zebrafish snoRNAome with ease and precision.</p>
+
+<p><em>Ready to explore? Start your journey with snoDanio today!</em></p>

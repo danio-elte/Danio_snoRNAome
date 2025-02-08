@@ -1,5 +1,7 @@
 library(shiny)
+library(shinycssloaders)
 library(plotly)
+library(shinyjs)
 library(shinythemes)
 library(ggplot2)
 library(DESeq2)
@@ -15,7 +17,8 @@ project_ids <- substr(gsub('.rds', "", filelist), 6, 20)
 size_ranges <- as.factor(projects$range)
 types <- as.factor(projects$type)
 
-ui <- fluidPage(theme = shinytheme("cosmo"),
+ui <- fluidPage(useShinyjs(),
+                theme = shinytheme("cosmo"),
                 tags$head(
                   tags$style(HTML("
       .centered-image {
@@ -52,6 +55,11 @@ ui <- fluidPage(theme = shinytheme("cosmo"),
                            uiOutput(style = "font-size: 20px; color: black; text-align: left;",
                                     "details"),
                            ),
+                          # New Tab Panel for User Journey
+                          tabPanel(title = "How to Use",
+                           mainPanel(
+                             uiOutput("user_journey")
+                           )),
                            #tabPanel(title="Zebrafish snoRNA similarity tree"),
                            tabPanel(title="Description of snoRNAs",
                                     sidebarPanel(
@@ -66,32 +74,47 @@ ui <- fluidPage(theme = shinytheme("cosmo"),
                                     )),
                            tabPanel(title="Explorer",
                                     sidebarPanel(
+                                      actionButton("load_data", "Load Data", class = "btn-primary"),  # Load button
+                                      br(), br(),
                                       selectInput("range", "Select a sequenced size-range:", unique(size_ranges), selected = "total"),
                                       selectInput("type", "Select an experiment-type:", unique(types), selected = "time"),
                                       uiOutput("project"),
+                                      textOutput("debug_message"),
                                       
                                       textInput("gene", "Give me a gene ID:", placeholder = "ENSDARG00000083434", value = "ENSDARG00000083434"),
                                       uiOutput("grouping"),
                                       tableOutput("top5")
                                     ),
                                     mainPanel(
+                                      conditionalPanel(
+                                        condition = "output.data_loaded == true",
                                       textOutput("sample_info", container = h2),
                                       #textOutput("condition_value"),
                                       #plotlyOutput("plot"),
                                       #plotlyOutput("parent_plot"),
-                                      uiOutput("plot_or_message"),
-                                      uiOutput("parent_plot_or_message")
+                                      withSpinner(uiOutput("plot_or_message"), type = 3, color = "#0d6efd", color.background="#f8f9fa"),
+                                      withSpinner(uiOutput("parent_plot_or_message"), type = 3, color = "#0d6efd", color.background="#f8f9fa")
                                       #tags$div("Please enter a value other than '-' to display the plot.")
-                                      
+                                      )
                                     )),
-                           #tabPanel(title="Digital in situ")
-                           tags$style(type="text/css",
+                          #tabPanel(title="Digital in situ"),
+                          tabPanel(title="References",
+                                   mainPanel(
+                                     dataTableOutput("ref_table"),
+                                   )),
+                          tags$style(type="text/css",
                                       ".shiny-output-error { visibility: hidden; }",
                                       ".shiny-output-error:before { visibility: hidden; }"
                            )
                 ))
 
 server <- function(input, output, session) {
+  # In the server function, render the description from the .txt file
+  output$user_journey <- renderUI({
+                                    journey_text <- readLines("howto.txt")
+                                    HTML(paste(journey_text))
+                                  })
+  
   output$snorna_desc_1 <- renderText("<br><br>Small nucleolar RNAs (snoRNAs) are essential RNA molecules\ 
                                    located in the nucleolus, primarily responsible for guiding \
                                    the chemical modifications of rRNA, tRNA, and snRNA. They are \
@@ -146,40 +169,80 @@ server <- function(input, output, session) {
     radioButtons("grouping", "Select a grouping factor:", choices = clist)
   })
   
-  output$project <-  renderUI({
-    project_ids <- projects[ which(projects$type ==input$type
-                                   & projects$range == input$range),]
-    project_ids <- as.vector(project_ids$project)
-    selectInput("project", "Select a dataset:", unique(project_ids), selected = "PRJNA330616")})
+  output$project <- renderUI({
+    filtered_projects <- projects[projects$type == input$type & projects$range == input$range,]
+    project_ids <- unique(filtered_projects$project)
+    
+    if (length(project_ids) == 0) {
+      output$debug_message <- renderText("⚠️ No projects available for the selected type and range combination.")
+      return(NULL)
+    } else {
+      output$debug_message <- renderText("")  # Clear message if projects exist
+      selectInput("project", "Select a dataset:", project_ids, selected = project_ids[1])
+    }
+  })
+  data_loaded <- reactiveVal(FALSE)  # Tracks whether data has been loaded
+  
+  observeEvent(input$load_data, {
+    data_loaded(TRUE)  # Set to TRUE after clicking Load Data
+    hide("load_data")
+  })
+  
+  output$data_loaded <- reactive({
+    data_loaded()  # Reflects state in UI for `conditionalPanel()`
+  })
+  outputOptions(output, "data_loaded", suspendWhenHidden = FALSE)
+  
+  output$data_loaded <- reactive({
+    data_loaded()  # Reflects state in UI for `conditionalPanel()`
+  })
+  outputOptions(output, "data_loaded", suspendWhenHidden = FALSE)
   
   output$sample_info <- renderText({paste0(as.character(subset(projects, project==input$project, select=title)))})
-  
-  
   
   df <- reactive({
     dds <- readRDS(paste('./data/', input$project, '.rds' , sep=""))
     choices <- strsplit(as.character(projects[projects$project==input$project, "type"]), " or ")
+    
     if (input$gene %in% rownames(dds)) {
       df <- plotCounts(dds, gene=input$gene, intgroup=unlist(choices), returnData = T)
-    } else {df <- NULL}
+      
+      # Subsample 100 points for performance
+      #if (nrow(df) > 1000) {
+      #  df <- df[sample(1:nrow(df), 1000), ]  
+     # }
+    } else {
+      df <- NULL
+    }
     return(df)
   })
   
-  parent <- reactive({if (nrow(subset(genes, genes[, 1] == input$gene)) == 0) {
-    parent <- "-"
-  } else {
-    parent <- subset(genes, genes[, 1] == input$gene)$parent_id
-  }
-    return(parent)})
+  
+  parent <- reactive({
+    if (nrow(subset(genes, genes[, 1] == input$gene)) == 0) {
+      return(NULL)  # Return NULL instead of "-"
+    } else {
+      return(subset(genes, genes[, 1] == input$gene)$parent_id)
+    }
+  })
   
   parent_df <- reactive({
+    parent_id <- parent()
+    
+    if (is.null(parent_id) || parent_id == "-") {
+      return(NULL)  # If no parent, return NULL
+    }
+    
     dds <- readRDS(paste('./data/', input$project, '.rds' , sep=""))
     choices <- strsplit(as.character(projects[projects$project==input$project, "type"]), " or ")
-    parent_id <- parent()
+    
     if (parent_id %in% rownames(dds)) {
-      parent_df <- plotCounts(dds, gene=parent_id, intgroup=unlist(choices), returnData = T)
-    } else {parent_df <- NULL}
-    return(parent_df)})
+      return(plotCounts(dds, gene=parent_id, intgroup=unlist(choices), returnData = T))
+    } else {
+      print(paste("Parent gene", parent_id, "not found in dataset", input$project))
+      return(NULL)
+    }
+  })
   
   # Check if the dataset is empty
   dataset_empty <- reactive({
@@ -188,27 +251,40 @@ server <- function(input, output, session) {
   
   # Render plot or custom message based on dataset availability
   output$plot_or_message <- renderUI({
-    if (!dataset_empty()) {
+    if (!is.null(df()) && nrow(df()) > 0) {
       tagList(plotlyOutput("plot"))
     } else {
-      tags$div("The ", input$gene, " is not significantly expressed in the bioproject", input$project, style = "color: red;")
+      tags$div(paste("No data available for gene:", input$gene, "in project:", input$project),
+               style = "color: red; font-weight: bold;")
     }
   })
-  
   # Render the plot
   output$plot <- renderPlotly({
-    ggplotly(ggplot(df(), aes(get(input$grouping), count, fill=get(input$grouping)), xlab="statistics",ylab="random numbers") + 
-               stat_boxplot(geom = "errorbar", width=0.5, position = position_dodge(1)) +
-               geom_boxplot(position = position_dodge(1), outlier.shape = NA) + 
-               ggtitle(paste("Expression plot of", input$gene, "from the bioproject", input$project, sep= " ")) +
-               xlab("Groups") + ylab("Normalised counts") + 
-               theme(
-                 plot.title = element_text(size = rel(1.5), face="italic", lineheight = 1.9),
-                 axis.title.x = element_text(size = rel(1.2), face="italic"),
-                 axis.title.y = element_text(size = rel(1.2), face="italic"),
-                 axis.text = element_text(size = rel(1.2)),
-                 legend.position = "none"
-               ))
+    req(data_loaded())
+    df_data <- df()
+    
+    if (nrow(df_data) == 0) {
+      validate(
+        need(FALSE, "No valid data available for the selected gene and project.")
+      )
+    }
+    
+    print(head(df_data))  # Debugging: Print first few rows
+    
+    p <- ggplot(df_data, aes_string(x=input$grouping, y="count", fill=input$grouping)) + 
+      stat_boxplot(geom = "errorbar", width=0.5, position = position_dodge(1)) +
+      geom_boxplot(position = position_dodge(1), outlier.shape = NA) + 
+      ggtitle(paste("Expression plot of", input$gene, "from the bioproject", input$project)) +
+      xlab("Groups") + ylab("Normalized counts") +
+      theme(
+        plot.title = element_text(size = rel(1.5), face="italic", lineheight = 1.9),
+        axis.title.x = element_text(size = rel(1.2), face="italic"),
+        axis.title.y = element_text(size = rel(1.2), face="italic"),
+        axis.text = element_text(size = rel(1.2)),
+        legend.position = "none"
+      )
+    
+    ggplotly(p)
   })
   
   # Reactive expression to track whether the plot is available
@@ -230,14 +306,16 @@ server <- function(input, output, session) {
   })
   
   output$parent_plot_or_message <- renderUI({
+    
     if (!parent_dataset_empty()) {
       tagList(plotlyOutput("parent_plot"))
     } else {
-      tags$div("Custom message when dataset is empty", style = "color: red;")
+      tags$div("No data available for parent gene", style = "color: red;")
     }
   })
   
   output$parent_plot <- renderPlotly({
+    req(data_loaded())
     ggplotly(ggplot(parent_df(), aes(get(input$grouping), count, fill=get(input$grouping)), xlab="statistics",ylab="random numbers") + 
                stat_boxplot(geom = "errorbar", width=0.5, position = position_dodge(1)) +
                geom_boxplot(position = position_dodge(1), outlier.shape = NA) + 
@@ -284,13 +362,15 @@ server <- function(input, output, session) {
   observeEvent(input$dynamic_rows_selected, {
     selected_row <- input$dynamic_rows_selected
     if (length(selected_row) > 0) {
-      selected_gene_id <- genes[selected_row, "id"]
+      selected_id <- genes[selected_row, "id"]
       selected_gene_parent_id <- genes[selected_row, "parent_id"]
       selected_gene_parent_name <- genes[selected_row, "parent_name"]
       selected_gene_parent_biotype <- genes[selected_row, "parent_biotype"]
       selected_gene_symbol <- genes[selected_row, "symbol"]
+      selected_gene_name <- genes[selected_row, "name"]
       selected_gene_family <- genes[selected_row, "rfam_family"]
-      new_info <- paste("<br>Gene ID:&nbsp;&nbsp;&nbsp;", selected_gene_id, '<br>', 
+      new_info <- paste("<br>Gene ID:&nbsp;&nbsp;&nbsp;", selected_id, '<br>', 
+                        #"<br>Gene Name:&nbsp;&nbsp;&nbsp;", selected_gene_name, '<br>',
                         "<br>Gene Symbol:&nbsp;&nbsp;&nbsp;", selected_gene_symbol, '<br>', 
                         "<br>Gene Rfam Family:&nbsp;&nbsp;&nbsp;", selected_gene_family, '<br>', 
                         "<br>Parent Gene ID:&nbsp;&nbsp;&nbsp;", selected_gene_parent_id,'<br>', 
@@ -333,6 +413,8 @@ server <- function(input, output, session) {
   output$selected_info <- renderText({
     HTML(selected_gene_info())  # Render selected_gene_info
   })
+  
+  output$ref_table <- renderDataTable(read.csv("./projects.csv", sep=";"), options = list(pageLength = 10))
 }
 
 # Create Shiny app ----
